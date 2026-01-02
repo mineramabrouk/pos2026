@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Editar Producto{% else %}Nuevo Producto{% endif %} - POS System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h4 class="mb-0">{% if form.instance.pk %}Editar Producto{% else %}Nuevo Producto{% endif %}</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label fw-medium">
+                            {{ field.label }}
+                        </label>
+
+                        <!-- Add form-control class to inputs if not already present (Django widgets usually need tweaks or custom widget attributes, but we can wrap or style via CSS if needed. For now, we assume default rendering but we can add class via JS or widget tweak in next step if needed. However, standard Django rendering is bare. We'll wrap in a div that applies styles or use a library like django-widget-tweaks. For this simple pass, we'll just style the container and let inputs be inputs, or try to add class via widget attrs in views.py. BUT, since I can't edit views.py easily for all widgets right now without a big refactor, I will just wrap them nicely. Wait, I can use a simple trick or just accept default styling for now, but better to use a small script or just style input elements globally in CSS if I can't change widgets. Actually, I'll add a small JS snippet to add 'form-control' class to all inputs for immediate Bootstrap look without touching Python code.) -->
+
+                        <div class="input-group">
+                            {{ field }}
+                        </div>
+
+                        {% if field.name == 'image' and field.value %}
+                        <div class="mt-2 p-2 border rounded bg-light d-inline-block">
+                            <img src="/media/{{ field.value }}" alt="Imagen actual" class="img-fluid rounded"
+                                style="max-height: 150px;">
+                            <div class="small text-muted mt-1">Imagen actual</div>
+                        </div>
+                        {% endif %}
+
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar
+                        </button>
+                        <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple script to add Bootstrap classes to Django form fields
+    document.querySelectorAll('input, select, textarea').forEach(element => {
+        if (element.type !== 'checkbox' && element.type !== 'radio' && element.type !== 'file') {
+            element.classList.add('form-control');
+        } else if (element.type === 'file') {
+            element.classList.add('form-control');
+        } else if (element.type === 'checkbox') {
+            element.classList.add('form-check-input');
+        }
+    });
+</script>
+{% endblock %}

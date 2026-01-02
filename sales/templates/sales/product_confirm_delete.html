@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Producto - POS System{% endblock %}
+
+{% block content %}
+<h1>Eliminar Producto</h1>
+
+<div style="background: white; padding: 2rem; border-radius: 8px; max-width: 600px;">
+    <p>¿Estás seguro de que deseas eliminar el producto <strong>{{ product.name }}</strong>?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+        <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
