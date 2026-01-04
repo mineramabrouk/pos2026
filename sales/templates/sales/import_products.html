@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Importar Productos desde Excel
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="bi bi-info-circle me-2"></i>Instrucciones</h5>
+                        <p>El archivo Excel debe tener las siguientes columnas (el orden no importa):</p>
+                        <ul>
+                            <li><strong>Nombre</strong> (Obligatorio)</li>
+                            <li><strong>Categoría</strong> (Opcional)</li>
+                            <li><strong>Precio</strong> (Obligatorio)</li>
+                            <li><strong>Costo</strong> (Obligatorio)</li>
+                            <li><strong>Stock</strong> (Opcional, por defecto 0)</li>
+                            <li><strong>Código de Barras</strong> (Opcional)</li>
+                        </ul>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" class="mt-4">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="excel_file" class="form-label">Seleccionar archivo Excel (.xlsx)</label>
+                            <input type="file" class="form-control" id="excel_file" name="excel_file" accept=".xlsx"
+                                required>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'product_list' %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-upload me-2"></i>Importar Productos
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

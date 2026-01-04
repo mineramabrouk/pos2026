@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Reporte de Ventas - POS System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0">
+            <i class="bi bi-receipt me-2 text-primary"></i>Reporte de Ventas
+        </h2>
+        <a href="{% url 'reports_index' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Volver a Reportes
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body bg-light">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="date_range" class="form-label fw-bold">Rango de Fechas</label>
+                    <select name="date_range" id="date_range" class="form-select" onchange="toggleCustomDates()">
+                        <option value="today" {% if current_filters.date_range=='today' %}selected{% endif %}>Hoy
+                        </option>
+                        <option value="week" {% if current_filters.date_range=='week' %}selected{% endif %}>Esta Semana
+                        </option>
+                        <option value="month" {% if current_filters.date_range=='month' %}selected{% endif %}>Este Mes
+                        </option>
+                        <option value="custom" {% if current_filters.date_range=='custom' %}selected{% endif %}>
+                            Personalizado</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 custom-date" style="display: none;">
+                    <label for="start_date" class="form-label fw-bold">Desde</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control"
+                        value="{{ current_filters.start_date }}">
+                </div>
+
+                <div class="col-md-3 custom-date" style="display: none;">
+                    <label for="end_date" class="form-label fw-bold">Hasta</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control"
+                        value="{{ current_filters.end_date }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="salesperson" class="form-label fw-bold">Vendedor</label>
+                    <select name="salesperson" id="salesperson" class="form-select">
+                        <option value="all">Todos</option>
+                        {% for user in salespeople %}
+                        <option value="{{ user.id }}" {% if current_filters.salesperson==user.id %}selected{% endif %}>
+                            {{ user.username }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-auto ms-auto">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-filter me-2"></i>Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="alert alert-info border-0 shadow-sm d-flex align-items-center mb-4">
+        <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+        <div>
+            <h5 class="mb-0">Total Ventas (Selección): <strong>{{ total_sales|floatformat:2 }} Bs</strong></h5>
+        </div>
+    </div>
+
+    <!-- Sales Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Recibo #</th>
+                            <th>Fecha</th>
+                            <th>Vendedor</th>
+                            <th class="text-end pe-4">Monto</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr>
+                            <td class="ps-4 fw-bold">{{ sale.receipt_number }}</td>
+                            <td>{{ sale.date_added|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <span class="badge bg-secondary bg-opacity-10 text-dark">
+                                    <i class="bi bi-person me-1"></i>{{ sale.salesperson.username }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4 fw-bold text-success">{{ sale.total_amount }} Bs</td>
+                            <td class="text-end pe-4">
+                                <a href="{% url 'receipt' sale.receipt_number %}" class="btn btn-sm btn-outline-primary"
+                                    target="_blank">
+                                    <i class="bi bi-printer"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                No se encontraron ventas con los filtros seleccionados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleCustomDates() {
+        const range = document.getElementById('date_range').value;
+        const customDates = document.querySelectorAll('.custom-date');
+
+        customDates.forEach(el => {
+            el.style.display = range === 'custom' ? 'block' : 'none';
+        });
+    }
+
+    // Run on load
+    document.addEventListener('DOMContentLoaded', toggleCustomDates);
+</script>
+{% endblock %}

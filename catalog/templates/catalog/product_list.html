@@ -1,0 +1,133 @@
+{% extends 'catalog/base_catalog.html' %}
+
+{% block content %}
+<!-- Homepage Slider -->
+{% if not request.GET.q %}
+<div id="mainCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="0" class="active" aria-current="true"
+            aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="{{ MEDIA_URL }}banners/banner_tech.png" class="d-block w-100" alt="Tecnología"
+                style="height: 400px; object-fit: cover;">
+        </div>
+        <div class="carousel-item">
+            <img src="{{ MEDIA_URL }}banners/banner_security.png" class="d-block w-100" alt="Seguridad"
+                style="height: 400px; object-fit: cover;">
+        </div>
+        <div class="carousel-item">
+            <img src="{{ MEDIA_URL }}banners/banner_offers.png" class="d-block w-100" alt="Ofertas"
+                style="height: 400px; object-fit: cover;">
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Siguiente</span>
+    </button>
+</div>
+{% endif %}
+
+<div class="container py-5">
+    <!-- Search Results Header -->
+    {% if request.GET.q %}
+    <div class="mb-4">
+        <h4 class="fw-normal text-muted">Resultados para: <span class="fw-bold text-dark">"{{ request.GET.q }}"</span>
+        </h4>
+    </div>
+    {% else %}
+    <div class="mb-4">
+        <h4 class="fw-bold text-dark border-bottom pb-2"
+            style="border-color: #003366 !important; display: inline-block;">NOVEDADES</h4>
+    </div>
+    {% endif %}
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for product in products %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm product-card" style="transition: all 0.3s ease;">
+                <!-- Product Image -->
+                <div class="position-relative p-3 bg-white text-center"
+                    style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" class="img-fluid"
+                        style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="{{ product.name }}">
+                    {% else %}
+                    <div class="text-muted">
+                        <i class="bi bi-image fs-1"></i>
+                        <p class="small mb-0">Sin imagen</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Wishlist Icon (Visual only) -->
+                    <button class="btn btn-link position-absolute top-0 end-0 text-muted p-2">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body bg-white pt-2">
+                    <!-- SKU/Barcode -->
+                    <div class="mb-1">
+                        <small class="text-muted" style="font-size: 0.8rem;">
+                            {% if product.barcode %}
+                            {{ product.barcode }}
+                            {% else %}
+                            SKU: N/A
+                            {% endif %}
+                        </small>
+                    </div>
+
+                    <!-- Product Name -->
+                    <h6 class="card-title mb-3">
+                        <a href="#" class="text-decoration-none text-dark fw-normal"
+                            style="font-size: 0.95rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.8em;">
+                            {{ product.name }}
+                        </a>
+                    </h6>
+
+                    <!-- Category -->
+                    {% if product.category %}
+                    <div class="mb-3">
+                        <span class="badge bg-light text-secondary border fw-normal">{{ product.category.name }}</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Actions -->
+                    <div class="d-grid gap-2">
+                        <a href="https://wa.me/59179431676?text=Hola,%20estoy%20interesado%20en%20el%20producto:%20{{ product.name|urlencode }}"
+                            target="_blank" class="btn btn-success btn-sm rounded-1"
+                            style="background-color: #25D366; border-color: #25D366;">
+                            <i class="bi bi-whatsapp me-1"></i> Contactar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="py-5">
+                <i class="bi bi-search display-1 text-muted mb-3 d-block opacity-25"></i>
+                <h3 class="text-muted fw-normal">No se encontraron productos.</h3>
+                <p class="text-muted">Intenta con otros términos de búsqueda.</p>
+                <a href="{% url 'catalog_home' %}" class="btn btn-outline-primary mt-3">Ver todos los productos</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+    }
+</style>
+{% endblock %}

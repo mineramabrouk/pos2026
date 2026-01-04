@@ -5,9 +5,14 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Gestión de Productos</h1>
-    <a href="{% url 'product_add' %}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Nuevo Producto
-    </a>
+    <div>
+        <a href="{% url 'import_products' %}" class="btn btn-success me-2">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Importar Excel
+        </a>
+        <a href="{% url 'product_add' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Nuevo Producto
+        </a>
+    </div>
 </div>
 
 <div class="card shadow-sm">

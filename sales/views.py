@@ -1,5 +1,5 @@
-from .models import Product, StockMovement, ExchangeRate, Category, Sale, SaleItem
-from .forms import StockMovementForm, ExchangeRateForm, CategoryForm
+from .models import Product, StockMovement, ExchangeRate, Category, Sale, SaleItem, CashTransaction
+from .forms import StockMovementForm, ExchangeRateForm, CategoryForm, CashTransactionForm
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -194,4 +194,116 @@ class ReceiptView(LoginRequiredMixin, DetailView):
     context_object_name = 'sale'
     slug_field = 'receipt_number'
     slug_url_kwarg = 'receipt_number'
+
+class CashTransactionCreateView(LoginRequiredMixin, CreateView):
+    model = CashTransaction
+    form_class = CashTransactionForm
+    template_name = 'sales/cash_transaction.html'
+    success_url = reverse_lazy('dashboard') # Redirect to Dashboard after adding
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        messages.success(self.request, 'Movimiento de caja registrado correctamente.')
+        return super().form_valid(form)
+
+class ImportProductsView(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
+    template_name = 'sales/import_products.html'
+
+    def post(self, request, *args, **kwargs):
+        if 'excel_file' not in request.FILES:
+            messages.error(request, 'Por favor seleccione un archivo.')
+            return redirect('import_products')
+
+        excel_file = request.FILES['excel_file']
+        
+        if not excel_file.name.endswith('.xlsx'):
+            messages.error(request, 'El archivo debe ser un Excel (.xlsx).')
+            return redirect('import_products')
+
+        try:
+            import openpyxl
+            wb = openpyxl.load_workbook(excel_file)
+            ws = wb.active
+
+            # Get headers
+            headers = [cell.value for cell in ws[1]]
+            
+            # Map headers to expected fields (case insensitive)
+            header_map = {}
+            for i, header in enumerate(headers):
+                if header:
+                    header_lower = str(header).lower().strip()
+                    if 'nombre' in header_lower: header_map['name'] = i
+                    elif 'categor' in header_lower: header_map['category'] = i
+                    elif 'precio' in header_lower: header_map['price'] = i
+                    elif 'costo' in header_lower: header_map['cost'] = i
+                    elif 'stock' in header_lower: header_map['stock'] = i
+                    elif 'código' in header_lower or 'codigo' in header_lower or 'barcode' in header_lower: header_map['barcode'] = i
+
+            # Validate required fields
+            required_fields = ['name', 'price', 'cost']
+            missing_fields = [field for field in required_fields if field not in header_map]
+            
+            if missing_fields:
+                messages.error(request, f'Faltan columnas obligatorias: {", ".join(missing_fields)}')
+                return redirect('import_products')
+
+            products_created = 0
+            products_updated = 0
+            
+            with transaction.atomic():
+                for row in ws.iter_rows(min_row=2, values_only=True):
+                    if not row[header_map['name']]: # Skip empty rows
+                        continue
+
+                    # Extract values
+                    name = row[header_map['name']]
+                    price = row[header_map['price']]
+                    cost = row[header_map['cost']]
+                    
+                    category_name = row[header_map['category']] if 'category' in header_map and row[header_map['category']] else None
+                    stock = row[header_map['stock']] if 'stock' in header_map and row[header_map['stock']] is not None else 0
+                    barcode = str(row[header_map['barcode']]) if 'barcode' in header_map and row[header_map['barcode']] else None
+
+                    # Get or create category
+                    category = None
+                    if category_name:
+                        category, _ = Category.objects.get_or_create(name=category_name)
+
+                    # Check if product exists by barcode (if provided) or name
+                    product = None
+                    if barcode:
+                        product = Product.objects.filter(barcode=barcode).first()
+                    
+                    if not product:
+                        product = Product.objects.filter(name=name).first()
+
+                    if product:
+                        # Update existing
+                        product.name = name
+                        product.category = category
+                        product.price = price
+                        product.cost = cost
+                        product.stock = stock # Optional: maybe add to stock instead of replace? For now replace.
+                        if barcode: product.barcode = barcode
+                        product.save()
+                        products_updated += 1
+                    else:
+                        # Create new
+                        Product.objects.create(
+                            name=name,
+                            category=category,
+                            price=price,
+                            cost=cost,
+                            stock=stock,
+                            barcode=barcode
+                        )
+                        products_created += 1
+
+            messages.success(request, f'Importación completada: {products_created} creados, {products_updated} actualizados.')
+            return redirect('product_list')
+
+        except Exception as e:
+            messages.error(request, f'Error al procesar el archivo: {str(e)}')
+            return redirect('import_products')
 

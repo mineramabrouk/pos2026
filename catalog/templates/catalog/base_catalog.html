@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Catálogo Online{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: #333;
+            color: #fff;
+            font-size: 0.8rem;
+            padding: 5px 0;
+        }
+
+        .top-bar a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+
+        /* Main Header */
+        .main-header {
+            background-color: #fff;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 45px 10px 20px;
+            border-radius: 25px;
+            border: 1px solid #ddd;
+            background-color: #f8f9fa;
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: none;
+            color: #666;
+        }
+
+        .header-icon {
+            font-size: 1.5rem;
+            color: #333;
+            position: relative;
+        }
+
+        .header-icon-label {
+            font-size: 0.75rem;
+            display: block;
+            color: #666;
+            text-align: center;
+        }
+
+        /* Navigation Bar */
+        .main-nav {
+            background-color: #003366;
+            /* Dark Blue */
+            padding: 0;
+        }
+
+        .main-nav .nav-link {
+            color: #fff;
+            padding: 15px 20px;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .main-nav .nav-link:hover {
+            background-color: #004080;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #222;
+            color: #ccc;
+        }
+
+        /* WhatsApp Float */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 40px;
+            right: 40px;
+            background-color: #25d366;
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 3px #999;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-float:hover {
+            background-color: #128c7e;
+            color: #FFF;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="social-icons">
+                <a href="#"><i class="bi bi-facebook"></i></a>
+                <a href="#"><i class="bi bi-instagram"></i></a>
+                <a href="#"><i class="bi bi-youtube"></i></a>
+                <a href="#"><i class="bi bi-tiktok"></i></a>
+            </div>
+            <div class="top-links">
+                <a href="#">Contacto</a>
+                <a href="#">Sucursales</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Logo -->
+                <div class="col-md-3">
+                    <a href="{% url 'catalog_home' %}" class="text-decoration-none">
+                        <img src="{{ MEDIA_URL }}logo.png" alt="Dero System" style="max-height: 120px; width: auto;">
+                    </a>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="col-md-6 text-center">
+                    <form action="{% url 'catalog_home' %}" method="get" class="search-container mx-auto">
+                        <input type="text" name="q" class="search-input" placeholder="Buscar producto..."
+                            value="{{ request.GET.q|default:'' }}">
+                        <button type="submit" class="search-btn">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- User Icons -->
+                <div class="col-md-3 d-flex justify-content-end gap-4">
+                    <div class="text-center">
+                        <a href="{% url 'login' %}" class="text-decoration-none">
+                            <i class="bi bi-person header-icon"></i>
+                            <span class="header-icon-label">Mi Cuenta</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg main-nav">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'catalog_home' %}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Productos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Marcas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Novedades</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Outlet</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="min-vh-100">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-white mb-3">DEROSYSTEM</h5>
+                    <p class="small">Empresa Tecnologica con mas de 8 años de eperiencia, somos pathner autorizados de
+                        importantes marcas mundiales .</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-white mb-3">Enlaces Rápidos</h5>
+                    <ul class="list-unstyled small">
+                        <li><a href="{% url 'about' %}" class="text-decoration-none text-white">Sobre Nosotros</a></li>
+                        <li><a href="#" class="text-decoration-none text-white">Términos y Condiciones</a></li>
+                        <li><a href="#" class="text-decoration-none text-white">Política de Privacidad</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-white mb-3">Contacto</h5>
+                    <p class="small text-white">
+                        <i class="bi bi-geo-alt me-2"></i>Calle Frias # 46, zona central, Potosi<br>
+                        <i class="bi bi-telephone me-2"></i>79431676 - 71820613<br>
+                        <i class="bi bi-envelope me-2"></i><a href="{% url 'contact' %}?subject=Consulta Ventas"
+                            class="text-white text-decoration-none">ventas@derosystem.com</a><br>
+                        <i class="bi bi-envelope me-2"></i><a href="{% url 'contact' %}?subject=Consulta Gerencia"
+                            class="text-white text-decoration-none">gerencia@derosystem.com</a><br>
+                        <i class="bi bi-globe me-2"></i>www.derosystem.com
+                    </p>
+                </div>
+            </div>
+            <hr class="border-secondary">
+            <div class="text-center small text-muted">
+                &copy; 2026 Derosystem. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <a href="https://wa.me/59179431676?text=Por%20favor%20requiero%20informacion%20acerca%20de..."
+        class="whatsapp-float" target="_blank">
+        <i class="bi bi-whatsapp"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

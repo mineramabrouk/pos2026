@@ -1,5 +1,5 @@
 from django import forms
-from .models import StockMovement, ExchangeRate, Category
+from .models import StockMovement, ExchangeRate, Category, Product, CashTransaction
 
 class CategoryForm(forms.ModelForm):
     class Meta:
@@ -40,4 +40,28 @@ class ExchangeRateForm(forms.ModelForm):
         }
         widgets = {
             'rate': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
+        }
+
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ['name', 'category', 'price', 'cost', 'stock', 'barcode', 'image']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'cost': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'stock': forms.NumberInput(attrs={'class': 'form-control'}),
+            'barcode': forms.TextInput(attrs={'class': 'form-control'}),
+            'image': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+
+class CashTransactionForm(forms.ModelForm):
+    class Meta:
+        model = CashTransaction
+        fields = ['type', 'description', 'amount']
+        widgets = {
+            'type': forms.Select(attrs={'class': 'form-select'}),
+            'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Mantenimiento preventivo, Compra de insumos'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
         }

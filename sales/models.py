@@ -105,3 +105,18 @@ class StockMovement(models.Model):
 
     def __str__(self):
         return f"{self.get_movement_type_display()} - {self.product.name} ({self.quantity})"
+
+class CashTransaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('IN', 'Ingreso'),
+        ('OUT', 'Egreso'),
+    ]
+
+    type = models.CharField(max_length=3, choices=TRANSACTION_TYPES, verbose_name="Tipo de Transacción")
+    description = models.CharField(max_length=255, verbose_name="Descripción")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto (BOB)")
+    date = models.DateTimeField(auto_now_add=True, verbose_name="Fecha")
+    user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name="Usuario")
+
+    def __str__(self):
+        return f"{self.get_type_display()}: {self.description} - {self.amount} BOB"

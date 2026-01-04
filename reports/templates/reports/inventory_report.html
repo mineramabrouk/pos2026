@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Reporte de Inventario - POS System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0">
+            <i class="bi bi-box-seam me-2 text-primary"></i>Reporte de Inventario
+        </h2>
+        <a href="{% url 'reports_index' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Volver a Reportes
+        </a>
+    </div>
+
+    <!-- Inventory Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Producto</th>
+                            <th>Código de Barras</th>
+                            <th class="text-center">Stock</th>
+                            <th class="text-end">Costo (BOB)</th>
+                            <th class="text-end">Precio (BOB)</th>
+                            <th class="text-end pe-4">Última Actualización</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td class="ps-4 fw-bold">{{ product.name }}</td>
+                            <td class="text-muted">{{ product.barcode|default:"-" }}</td>
+                            <td class="text-center">
+                                <span
+                                    class="badge {% if product.stock > 10 %}bg-success{% elif product.stock > 0 %}bg-warning{% else %}bg-danger{% endif %} bg-opacity-10 text-dark">
+                                    {{ product.stock }}
+                                </span>
+                            </td>
+                            <td class="text-end">{{ product.cost }} Bs</td>
+                            <td class="text-end fw-bold">{{ product.price }} Bs</td>
+                            <td class="text-end pe-4 text-muted small">
+                                {{ product.last_updated|date:"d/m/Y H:i" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                No hay productos registrados en el inventario.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -50,6 +50,12 @@
         <a href="{% url 'pos' %}" class="card-action">Ir al POS &rarr;</a>
     </div>
 
+    <div class="card">
+        <h3>Movimientos de Caja</h3>
+        <p>Registrar ingresos y egresos de efectivo.</p>
+        <a href="{% url 'add_cash_transaction' %}" class="card-action">Registrar Movimiento &rarr;</a>
+    </div>
+
     {% if is_admin %}
     <div class="card">
         <h3>Inventario</h3>
@@ -72,7 +78,7 @@
     <div class="card">
         <h3>Reportes</h3>
         <p>Ver reportes de ventas y estadísticas.</p>
-        <a href="#" class="card-action">Ver Reportes &rarr;</a>
+        <a href="{% url 'reports_index' %}" class="card-action">Ver Reportes &rarr;</a>
     </div>
     {% endif %}
 </div>

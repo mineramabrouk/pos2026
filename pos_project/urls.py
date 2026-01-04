@@ -19,8 +19,10 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('users.urls')),
+    path('', include('catalog.urls')),
+    path('accounts/', include('users.urls')),
     path('sales/', include('sales.urls')),
+    path('reports/', include('reports.urls')),
 ]
 
 from django.conf import settings

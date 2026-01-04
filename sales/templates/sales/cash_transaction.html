@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Movimiento de Caja - POS System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0 fw-bold">
+                        <i class="bi bi-wallet2 me-2 text-primary"></i>Registrar Movimiento de Caja
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate id="transactionForm">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.type.id_for_label }}" class="form-label fw-bold">Tipo de
+                                Movimiento</label>
+                            {{ form.type }}
+                            {% if form.type.errors %}
+                            <div class="text-danger small mt-1">{{ form.type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">Descripción /
+                                Motivo</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-text">Ej: Pago de servicios, Venta de cartón, Reparación de PC.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.amount.id_for_label }}" class="form-label fw-bold">Monto (Bs)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Bs</span>
+                                {{ form.amount }}
+                            </div>
+                            {% if form.amount.errors %}
+                            <div class="text-danger small mt-1">{{ form.amount.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-save me-2"></i>Registrar Movimiento
+                            </button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                                Cancelar y Volver al Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('transactionForm');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const typeSelect = document.getElementById('{{ form.type.id_for_label }}');
+            const amountInput = document.getElementById('{{ form.amount.id_for_label }}');
+            const descriptionInput = document.getElementById('{{ form.description.id_for_label }}');
+
+            const typeText = typeSelect.options[typeSelect.selectedIndex].text;
+            const amount = amountInput.value;
+            const description = descriptionInput.value;
+
+            if (!amount || !description) {
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+            }
+
+            Swal.fire({
+                title: '¿Confirmar Movimiento?',
+                html: `
+                    <div class="text-start">
+                        <p class="mb-2">Estás a punto de registrar:</p>
+                        <ul class="list-unstyled">
+                            <li><strong>Tipo:</strong> ${typeText}</li>
+                            <li><strong>Monto:</strong> ${amount} Bs</li>
+                            <li><strong>Motivo:</strong> ${description}</li>
+                        </ul>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#D32F2F', // Primary red color
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, Registrar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

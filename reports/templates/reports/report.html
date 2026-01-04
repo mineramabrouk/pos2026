@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes Financieros - POS System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0">
+            <i class="bi bi-bar-chart-line me-2 text-primary"></i>Reportes Financieros
+        </h2>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Volver al Dashboard
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body bg-light">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="date_range" class="form-label fw-bold">Rango de Fechas</label>
+                    <select name="date_range" id="date_range" class="form-select" onchange="toggleCustomDates()">
+                        <option value="today" {% if current_filters.is_today %}selected{% endif %}>Hoy</option>
+                        <option value="week" {% if current_filters.is_week %}selected{% endif %}>Esta Semana</option>
+                        <option value="month" {% if current_filters.is_month %}selected{% endif %}>Este Mes</option>
+                        <option value="year" {% if current_filters.is_year %}selected{% endif %}>Este Año</option>
+                        <option value="custom" {% if current_filters.is_custom %}selected{% endif %}>Personalizado
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 custom-date" style="display: none;">
+                    <label for="start_date" class="form-label fw-bold">Desde</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control"
+                        value="{{ current_filters.start_date|default:'' }}">
+                </div>
+
+                <div class="col-md-3 custom-date" style="display: none;">
+                    <label for="end_date" class="form-label fw-bold">Hasta</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control"
+                        value="{{ current_filters.end_date|default:'' }}">
+                </div>
+
+                <div class="col-md-auto ms-auto">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-filter me-2"></i>Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-5">
+        <!-- Total Sales -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Ventas Totales</h6>
+                    <h3 class="fw-bold text-success mb-0">{{ total_sales|floatformat:2 }} Bs</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cash In -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Ingresos Caja</h6>
+                    <h3 class="fw-bold text-primary mb-0">{{ cash_in|floatformat:2 }} Bs</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cash Out -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Egresos Caja</h6>
+                    <h3 class="fw-bold text-danger mb-0">{{ cash_out|floatformat:2 }} Bs</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Net Balance -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Balance Neto</h6>
+                    <h3 class="fw-bold {% if net_balance >= 0 %}text-success{% else %}text-danger{% endif %} mb-0">
+                        {{ net_balance|floatformat:2 }} Bs
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Recent Sales -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0 fw-bold">Últimas Ventas</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Recibo #</th>
+                                    <th>Fecha</th>
+                                    <th class="text-end">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sale in recent_sales %}
+                                <tr>
+                                    <td>{{ sale.receipt_number }}</td>
+                                    <td>{{ sale.date_added|date:"d/m/Y H:i" }}</td>
+                                    <td class="text-end fw-bold">{{ sale.total_amount }} Bs</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-3 text-muted">No hay ventas registradas.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Cash Movements -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0 fw-bold">Últimos Movimientos de Caja</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Motivo</th>
+                                    <th class="text-end">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for movement in recent_cash_movements %}
+                                <tr>
+                                    <td>
+                                        {% if movement.type == 'IN' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success">Ingreso</span>
+                                        {% else %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger">Egreso</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ movement.description }}</td>
+                                    <td class="text-end fw-bold">{{ movement.amount }} Bs</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-3 text-muted">No hay movimientos registrados.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleCustomDates() {
+        const range = document.getElementById('date_range').value;
+        const customDates = document.querySelectorAll('.custom-date');
+
+        customDates.forEach(el => {
+            el.style.display = range === 'custom' ? 'block' : 'none';
+        });
+    }
+
+    // Run on load
+    document.addEventListener('DOMContentLoaded', toggleCustomDates);
+</script>
+{% endblock %}
